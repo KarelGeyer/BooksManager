@@ -1,0 +1,170 @@
+@page "/create-book"
+@using System.Net.Http.Json
+@using System.Text.Json
+@using BookManagement.Common.Requests
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Přidat novou knihu</h4>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Chyba!</strong> @errorMessage
+                            <button type="button" class="btn-close" @onclick="() => errorMessage = null"></button>
+                        </div>
+                    }
+                    
+                    <EditForm Model="newBook" OnValidSubmit="CreateBookAsync">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="alert alert-danger" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Název knihy <span class="text-danger">*</span></label>
+                            <InputText class="form-control" @bind-Value="newBook.Title" placeholder="Zadej název knihy" />
+                            <ValidationMessage For="@(() => newBook.Title)" class="text-danger" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Autor <span class="text-danger">*</span></label>
+                            <InputText class="form-control" @bind-Value="newBook.Author" placeholder="Zadej jméno autora" />
+                            <ValidationMessage For="@(() => newBook.Author)" class="text-danger" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">ISBN <span class="text-danger">*</span></label>
+                            <InputText class="form-control" @bind-Value="newBook.ISBN" placeholder="Zadej ISBN (10-13 znaků)" />
+                            <ValidationMessage For="@(() => newBook.ISBN)" class="text-danger" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Rok vydání <span class="text-danger">*</span></label>
+                                <InputNumber class="form-control" @bind-Value="newBook.PublicationYear" placeholder="Např. 2023" />
+                                <ValidationMessage For="@(() => newBook.PublicationYear)" class="text-danger" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Počet kusů <span class="text-danger">*</span></label>
+                                <InputNumber class="form-control" @bind-Value="newBook.AmountAvailable" placeholder="Počet dostupných kusů" />
+                                <ValidationMessage For="@(() => newBook.AmountAvailable)" class="text-danger" />
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary w-100" disabled="@isSubmitting">
+                                @if (isSubmitting)
+                                {
+                                    <span><span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Přidávání...</span>
+                                }
+                                else
+                                {
+                                    <span>Přidat knihu</span>
+                                }
+                            </button>
+                            <button type="button" class="btn btn-secondary" @onclick="ResetForm">Vymazat</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(message))
+            {
+                <div class="alert @messageClass alert-dismissible fade show mt-3" role="alert">
+                    @message
+                    <button type="button" class="btn-close" @onclick="() => message = null"></button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private CreateBookRequest newBook = new();
+    private string? message;
+    private string messageClass = "alert-info";
+    private string? errorMessage;
+    private bool isSubmitting = false;
+
+    [Inject]
+    public HttpClient Http { get; set; } = default!;
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; } = default!;
+
+    private async Task CreateBookAsync()
+    {
+        isSubmitting = true;
+        errorMessage = null;
+        
+        try
+        {
+            if (string.IsNullOrWhiteSpace(newBook.Title) || string.IsNullOrWhiteSpace(newBook.Author) || 
+                string.IsNullOrWhiteSpace(newBook.ISBN))
+            {
+                ShowMessage("Prosím vyplň všechna povinná pole.", "alert-warning");
+                isSubmitting = false;
+                return;
+            }
+            
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            var response = await Http.PostAsJsonAsync("Books/create", newBook, cts.Token);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                ShowMessage("Kniha byla úspěšně přidána! Přesměrování...", "alert-success");
+                ResetForm();
+                await Task.Delay(1500);
+                NavigationManager.NavigateTo("/books");
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                ShowMessage("Kniha s tímto ISBN již existuje. Zkus prosím jiný ISBN.", "alert-danger");
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.UnprocessableEntity)
+            {
+                ShowMessage("Data nejsou v správném formátu. Zkontroluj prosím vstupní hodnoty.", "alert-danger");
+            }
+            else
+            {
+                ShowMessage($"Chyba na serveru (kod: {response.StatusCode}). Zkus to prosím později.", "alert-danger");
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            errorMessage = "Operace vypršela. Zkuste to prosím znovu.";
+        }
+        catch (HttpRequestException)
+        {
+            errorMessage = "Nelze se připojit k serveru. Ujistěte se, že je backend spuštěný na http://localhost:5001";
+        }
+        catch (JsonException)
+        {
+            errorMessage = "Chyba při serializaci dat. Zkontroluj prosím vstupní hodnoty.";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Neočekávaná chyba: {ex.GetType().Name}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void ResetForm()
+    {
+        newBook = new();
+        message = null;
+    }
+
+    private void ShowMessage(string msg, string cssClass)
+    {
+        message = msg;
+        messageClass = cssClass;
+    }
+}

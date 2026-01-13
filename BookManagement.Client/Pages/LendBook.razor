@@ -1,0 +1,272 @@
+@page "/lend-book"
+@using System.Net.Http.Json
+@using System.Text.Json
+@using BookManagement.Common.Responses
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Půjčování a vracení knih</h2>
+        <button class="btn btn-outline-primary" @onclick="LoadBooksAsync" disabled="@isLoading">
+            @if (isLoading)
+            {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <span>Obnovuji...</span>
+            }
+            else
+            {
+                <span>🔄 Obnovit</span>
+            }
+        </button>
+    </div>
+    
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Chyba!</strong> @errorMessage
+            <button type="button" class="btn-close" @onclick="() => errorMessage = null"></button>
+        </div>
+    }
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5>Půjčit knihu</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Vyhledej knihu podle ISBN:</label>
+                        <input class="form-control" type="text" placeholder="Zadej ISBN..." @bind="lendISBN" />
+                    </div>
+                    <button class="btn btn-success w-100" @onclick="LendBookAsync" disabled="@isProcessing">
+                        @if (isProcessing) { <span>Zpracovávám...</span> } else { <span>Půjčit knihu</span> }
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5>Vrátit knihu</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Vyhledej knihu podle ISBN:</label>
+                        <input class="form-control" type="text" placeholder="Zadej ISBN..." @bind="returnISBN" />
+                    </div>
+                    <button class="btn btn-warning w-100" @onclick="ReturnBookAsync" disabled="@isProcessing">
+                        @if (isProcessing) { <span>Zpracovávám...</span> } else { <span>Vrátit knihu</span> }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="alert @messageClass alert-dismissible fade show mt-3" role="alert">
+            @message
+            <button type="button" class="btn-close" @onclick="() => message = null"></button>
+        </div>
+    }
+
+    <hr class="my-4" />
+
+    <h4>Stav knih</h4>
+    @if (books == null)
+    {
+        <p class="text-muted">Načítání knih...</p>
+    }
+    else if (books.Count == 0)
+    {
+        <div class="alert alert-info">Žádné knihy nebyly nalezeny.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Název</th>
+                        <th>ISBN</th>
+                        <th>Dostupné kusy</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var book in books.OrderBy(b => b.Title))
+                    {
+                        <tr>
+                            <td>@book.Title</td>
+                            <td>@book.ISBN</td>
+                            <td>
+                                <span class="badge @(book.AmountAvailable > 0 ? "bg-success" : "bg-danger")">
+                                    @book.AmountAvailable
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    private List<BookResponse>? books;
+    private string lendISBN = string.Empty;
+    private string returnISBN = string.Empty;
+    private string? message;
+    private string messageClass = "alert-info";
+    private string? errorMessage;
+    private bool isLoading = false;
+    private bool isProcessing = false;
+
+    [Inject]
+    public HttpClient Http { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBooksAsync();
+    }
+
+    private async Task LoadBooksAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+        
+        try
+        {
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            books = await Http.GetFromJsonAsync<List<BookResponse>>("Books", cts.Token) ?? new List<BookResponse>();
+        }
+        catch (TaskCanceledException)
+        {
+            errorMessage = "Vypršel časový limit. Zkuste to prosím znovu.";
+            books = new List<BookResponse>();
+        }
+        catch (HttpRequestException)
+        {
+            errorMessage = "Nelze se připojit k serveru. Ujistěte se, že je backend spuštěný na http://localhost:5001";
+            books = new List<BookResponse>();
+        }
+        catch (JsonException)
+        {
+            errorMessage = "Backend vrátil neplatná data.";
+            books = new List<BookResponse>();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Chyba při načítání knih: {ex.GetType().Name}";
+            books = new List<BookResponse>();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LendBookAsync()
+    {
+        if (string.IsNullOrWhiteSpace(lendISBN))
+        {
+            ShowMessage("Prosím zadej ISBN.", "alert-warning");
+            return;
+        }
+
+        isProcessing = true;
+        try
+        {
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            var response = await Http.PostAsync($"Books/lend/{lendISBN}", null, cts.Token);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                ShowMessage($"Kniha s ISBN {lendISBN} byla úspěšně půjčena.", "alert-success");
+                lendISBN = string.Empty;
+                await LoadBooksAsync();
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                ShowMessage($"Kniha s ISBN {lendISBN} nebyla nalezena.", "alert-danger");
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                ShowMessage($"Tato kniha není dostupná pro půjčení.", "alert-danger");
+            }
+            else
+            {
+                ShowMessage($"Chyba při půjčování (kod: {response.StatusCode}).", "alert-danger");
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            errorMessage = "Operace vypršela. Zkuste to prosím znovu.";
+        }
+        catch (HttpRequestException)
+        {
+            errorMessage = "Nelze se připojit k serveru.";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Chyba: {ex.GetType().Name}";
+        }
+        finally
+        {
+            isProcessing = false;
+        }
+    }
+
+    private async Task ReturnBookAsync()
+    {
+        if (string.IsNullOrWhiteSpace(returnISBN))
+        {
+            ShowMessage("Prosím zadej ISBN.", "alert-warning");
+            return;
+        }
+
+        isProcessing = true;
+        try
+        {
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            var response = await Http.PostAsync($"Books/return/{returnISBN}", null, cts.Token);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                ShowMessage($"Kniha s ISBN {returnISBN} byla úspěšně vrácena.", "alert-success");
+                returnISBN = string.Empty;
+                await LoadBooksAsync();
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                ShowMessage($"Kniha s ISBN {returnISBN} nebyla nalezena.", "alert-danger");
+            }
+            else
+            {
+                ShowMessage($"Chyba při vracení (kod: {response.StatusCode}).", "alert-danger");
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            errorMessage = "Operace vypršela. Zkuste to prosím znovu.";
+        }
+        catch (HttpRequestException)
+        {
+            errorMessage = "Nelze se připojit k serveru.";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Chyba: {ex.GetType().Name}";
+        }
+        finally
+        {
+            isProcessing = false;
+        }
+    }
+
+    private void ShowMessage(string msg, string cssClass)
+    {
+        message = msg;
+        messageClass = cssClass;
+    }
+}

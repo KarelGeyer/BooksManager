@@ -1,0 +1,57 @@
+# === IDE & OS ===
+.vs/
+.vscode/
+.idea/
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# === Build & Output ===
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+publish/
+*.dll
+*.exe
+*.pdb
+*.com
+*.class
+
+# === Konfigurace & Tajné údaje ===
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.json
+!appsettings.json
+
+# Secrets
+secrets.json
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# === Vývojářské nástroje ===
+*.http
+
+# NuGet balíčky
+[Pp]ackages/
+project.lock.json
+project.assets.json
+
+# === Testování & Logy ===
+TestResults/
+coverage/
+*.trx
+*.log
+logs/
+
+# === Ostatní ===
+node_modules/
+.npm
