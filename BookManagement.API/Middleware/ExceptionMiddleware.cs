@@ -71,7 +71,7 @@ namespace BookManagement.Common.Middleware
                     status = HttpStatusCode.NotFound;
                     message = exception.Message;
                     break;
-                case FailedToLendExpection:
+                case FailedToLendException:
                     status = HttpStatusCode.BadRequest;
                     message = exception.Message;
                     break;

@@ -9,7 +9,7 @@ namespace BookManagement.Common.Exceptions
     /// <summary>
     /// Represents an exception that occurs when the system fails to lend an entity.
     /// </summary>
-    public class FailedToLendExpection : Exception
+    public class FailedToLendException : Exception
     {
         public Type EntityType { get; }
         public string? Reason { get; }
@@ -20,7 +20,7 @@ namespace BookManagement.Common.Exceptions
         /// </summary>
         /// <param name="entityType">The type of the entity that could not be lent.</param>
         /// <param name="reason">An optional description of the reason for failure.</param>
-        public FailedToLendExpection(Type entityType, string? reason = null)
+        public FailedToLendException(Type entityType, string? reason = null)
             : base(BuildMessage(entityType, reason))
         {
             EntityType = entityType;

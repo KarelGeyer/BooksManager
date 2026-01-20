@@ -41,6 +41,28 @@ namespace BookManagment.Controllers
         }
 
         /// <summary>
+        /// Retrieves all books by size.
+        /// </summary>
+        /// <param name="ct">
+        /// <param name="page">
+        /// <param name="pageSize">
+        /// Cancellation token used to cancel the request.
+        /// </param>
+        /// <returns>
+        /// An <see cref="ActionResult"/> containing a collection of <see cref="BookResponse"/> objects.
+        /// </returns>
+        [HttpGet("GetAllPaginated")]
+        public async Task<ActionResult<PagedResult<BookResponse>>> GetAll(
+            CancellationToken ct,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10
+        )
+        {
+            var books = await _bookService.GetAll(ct, page, pageSize);
+            return Ok(books);
+        }
+
+        /// <summary>
         /// Retrieves books that match the specified name.
         /// </summary>
         /// <param name="name">

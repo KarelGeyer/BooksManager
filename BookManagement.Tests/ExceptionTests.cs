@@ -73,7 +73,7 @@ namespace BookManagement.Tests
             var type = typeof(Book);
 
             // Act
-            var exception = new FailedToLendExpection(type);
+            var exception = new FailedToLendException(type);
 
             // Assert
             Assert.NotNull(exception);
@@ -88,7 +88,7 @@ namespace BookManagement.Tests
             var message = "Book not available";
 
             // Act
-            var exception = new FailedToLendExpection(type, message);
+            var exception = new FailedToLendException(type, message);
 
             // Assert
             Assert.NotNull(exception);

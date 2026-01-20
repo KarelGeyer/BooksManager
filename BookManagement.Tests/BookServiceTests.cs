@@ -26,11 +26,28 @@ namespace BookManagement.Tests
             // Arrange
             var books = new List<Book>
             {
-                new Book { Id = 1, Title = "Book 1", Author = "Author 1", ISBN = "1234567890", PublicationYear = 2020, AmountAvailable = 5 },
-                new Book { Id = 2, Title = "Book 2", Author = "Author 2", ISBN = "0987654321", PublicationYear = 2021, AmountAvailable = 3 }
+                new Book
+                {
+                    Id = 1,
+                    Title = "Book 1",
+                    Author = "Author 1",
+                    ISBN = "1234567890",
+                    PublicationYear = 2020,
+                    AmountAvailable = 5,
+                },
+                new Book
+                {
+                    Id = 2,
+                    Title = "Book 2",
+                    Author = "Author 2",
+                    ISBN = "0987654321",
+                    PublicationYear = 2021,
+                    AmountAvailable = 3,
+                },
             };
 
-            _mockDbService.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>(), null))
+            _mockDbService
+                .Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>(), null))
                 .ReturnsAsync(books);
 
             // Act
@@ -41,14 +58,18 @@ namespace BookManagement.Tests
             Assert.Equal(2, result.Count);
             Assert.Equal("Book 1", result[0].Title);
             Assert.Equal("Author 2", result[1].Author);
-            _mockDbService.Verify(x => x.GetAllAsync(It.IsAny<CancellationToken>(), null), Times.Once);
+            _mockDbService.Verify(
+                x => x.GetAllAsync(It.IsAny<CancellationToken>(), null),
+                Times.Once
+            );
         }
 
         [Fact]
         public async Task GetAll_ReturnsEmptyList_WhenNoBooksExist()
         {
             // Arrange
-            _mockDbService.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>(), null))
+            _mockDbService
+                .Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>(), null))
                 .ReturnsAsync(new List<Book>());
 
             // Act
@@ -75,10 +96,16 @@ namespace BookManagement.Tests
                 Author = "Test Author",
                 ISBN = isbn,
                 PublicationYear = 2020,
-                AmountAvailable = 5
+                AmountAvailable = 5,
             };
 
-            _mockDbService.Setup(x => x.GetAsync(It.IsAny<CancellationToken>(), It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()))
+            _mockDbService
+                .Setup(x =>
+                    x.GetAsync(
+                        It.IsAny<CancellationToken>(),
+                        It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()
+                    )
+                )
                 .ReturnsAsync(book);
 
             // Act
@@ -95,7 +122,13 @@ namespace BookManagement.Tests
         public async Task GetByISBN_ReturnsNull_WhenBookDoesNotExist()
         {
             // Arrange
-            _mockDbService.Setup(x => x.GetAsync(It.IsAny<CancellationToken>(), It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()))
+            _mockDbService
+                .Setup(x =>
+                    x.GetAsync(
+                        It.IsAny<CancellationToken>(),
+                        It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()
+                    )
+                )
                 .ReturnsAsync((Book)null);
 
             // Act
@@ -116,10 +149,24 @@ namespace BookManagement.Tests
             var name = "Test Book";
             var books = new List<Book>
             {
-                new Book { Id = 1, Title = name, Author = "Author 1", ISBN = "1234567890", PublicationYear = 2020, AmountAvailable = 5 }
+                new Book
+                {
+                    Id = 1,
+                    Title = name,
+                    Author = "Author 1",
+                    ISBN = "1234567890",
+                    PublicationYear = 2020,
+                    AmountAvailable = 5,
+                },
             };
 
-            _mockDbService.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>(), It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()))
+            _mockDbService
+                .Setup(x =>
+                    x.GetAllAsync(
+                        It.IsAny<CancellationToken>(),
+                        It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()
+                    )
+                )
                 .ReturnsAsync(books);
 
             // Act
@@ -135,7 +182,13 @@ namespace BookManagement.Tests
         public async Task GetByName_ReturnsEmptyList_WhenNoMatchFound()
         {
             // Arrange
-            _mockDbService.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>(), It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()))
+            _mockDbService
+                .Setup(x =>
+                    x.GetAllAsync(
+                        It.IsAny<CancellationToken>(),
+                        It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()
+                    )
+                )
                 .ReturnsAsync(new List<Book>());
 
             // Act
@@ -157,11 +210,33 @@ namespace BookManagement.Tests
             var author = "Test Author";
             var books = new List<Book>
             {
-                new Book { Id = 1, Title = "Book 1", Author = author, ISBN = "1234567890", PublicationYear = 2020, AmountAvailable = 5 },
-                new Book { Id = 2, Title = "Book 2", Author = author, ISBN = "0987654321", PublicationYear = 2021, AmountAvailable = 3 }
+                new Book
+                {
+                    Id = 1,
+                    Title = "Book 1",
+                    Author = author,
+                    ISBN = "1234567890",
+                    PublicationYear = 2020,
+                    AmountAvailable = 5,
+                },
+                new Book
+                {
+                    Id = 2,
+                    Title = "Book 2",
+                    Author = author,
+                    ISBN = "0987654321",
+                    PublicationYear = 2021,
+                    AmountAvailable = 3,
+                },
             };
 
-            _mockDbService.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>(), It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()))
+            _mockDbService
+                .Setup(x =>
+                    x.GetAllAsync(
+                        It.IsAny<CancellationToken>(),
+                        It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()
+                    )
+                )
                 .ReturnsAsync(books);
 
             // Act
@@ -187,10 +262,16 @@ namespace BookManagement.Tests
                 Author = "New Author",
                 ISBN = "1111111111",
                 PublicationYear = 2024,
-                AmountAvailable = 10
+                AmountAvailable = 10,
             };
 
-            _mockDbService.Setup(x => x.GetAsync(It.IsAny<CancellationToken>(), It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()))
+            _mockDbService
+                .Setup(x =>
+                    x.GetAsync(
+                        It.IsAny<CancellationToken>(),
+                        It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()
+                    )
+                )
                 .ReturnsAsync((Book)null);
 
             var createdBook = new Book
@@ -200,10 +281,11 @@ namespace BookManagement.Tests
                 Author = request.Author,
                 ISBN = request.ISBN,
                 PublicationYear = request.PublicationYear,
-                AmountAvailable = request.AmountAvailable
+                AmountAvailable = request.AmountAvailable,
             };
 
-            _mockDbService.Setup(x => x.CreateAsync(It.IsAny<CancellationToken>(), It.IsAny<Book>()))
+            _mockDbService
+                .Setup(x => x.CreateAsync(It.IsAny<CancellationToken>(), It.IsAny<Book>()))
                 .ReturnsAsync(createdBook);
 
             // Act
@@ -213,7 +295,10 @@ namespace BookManagement.Tests
             Assert.NotNull(result);
             Assert.Equal(request.Title, result.Title);
             Assert.Equal(request.ISBN, result.ISBN);
-            _mockDbService.Verify(x => x.CreateAsync(It.IsAny<CancellationToken>(), It.IsAny<Book>()), Times.Once);
+            _mockDbService.Verify(
+                x => x.CreateAsync(It.IsAny<CancellationToken>(), It.IsAny<Book>()),
+                Times.Once
+            );
         }
 
         [Fact]
@@ -226,12 +311,18 @@ namespace BookManagement.Tests
                 Author = "Author",
                 ISBN = "1111111111",
                 PublicationYear = 2024,
-                AmountAvailable = 10
+                AmountAvailable = 10,
             };
 
             var existingBook = new Book { ISBN = request.ISBN };
 
-            _mockDbService.Setup(x => x.GetAsync(It.IsAny<CancellationToken>(), It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()))
+            _mockDbService
+                .Setup(x =>
+                    x.GetAsync(
+                        It.IsAny<CancellationToken>(),
+                        It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()
+                    )
+                )
                 .ReturnsAsync(existingBook);
 
             // Act & Assert
@@ -256,10 +347,16 @@ namespace BookManagement.Tests
                 Author = "Test Author",
                 ISBN = isbn,
                 PublicationYear = 2020,
-                AmountAvailable = 5
+                AmountAvailable = 5,
             };
 
-            _mockDbService.Setup(x => x.GetAsync(It.IsAny<CancellationToken>(), It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()))
+            _mockDbService
+                .Setup(x =>
+                    x.GetAsync(
+                        It.IsAny<CancellationToken>(),
+                        It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()
+                    )
+                )
                 .ReturnsAsync(book);
 
             var expectedBook = new Book
@@ -269,14 +366,24 @@ namespace BookManagement.Tests
                 Author = "Test Author",
                 ISBN = isbn,
                 PublicationYear = 2020,
-                AmountAvailable = 4
+                AmountAvailable = 4,
             };
 
-            _mockDbService.Setup(x => x.UpdateAsync(It.IsAny<CancellationToken>(), It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>(), It.IsAny<Book>()))
+            _mockDbService
+                .Setup(x =>
+                    x.UpdateAsync(
+                        It.IsAny<CancellationToken>(),
+                        It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>(),
+                        It.IsAny<Book>()
+                    )
+                )
                 .ReturnsAsync(expectedBook);
 
             // Act
-            var result = await _bookService.DecreaseAvailableBookAmount(CancellationToken.None, isbn);
+            var result = await _bookService.DecreaseAvailableBookAmount(
+                CancellationToken.None,
+                isbn
+            );
 
             // Assert
             Assert.NotNull(result);
@@ -288,12 +395,19 @@ namespace BookManagement.Tests
         public async Task DecreaseAvailableBookAmount_ThrowsException_WhenBookNotFound()
         {
             // Arrange
-            _mockDbService.Setup(x => x.GetAsync(It.IsAny<CancellationToken>(), It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()))
+            _mockDbService
+                .Setup(x =>
+                    x.GetAsync(
+                        It.IsAny<CancellationToken>(),
+                        It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()
+                    )
+                )
                 .ReturnsAsync((Book)null);
 
             // Act & Assert
             await Assert.ThrowsAsync<BookManagement.Common.Exceptions.NotFoundException>(
-                () => _bookService.DecreaseAvailableBookAmount(CancellationToken.None, "nonexistent")
+                () =>
+                    _bookService.DecreaseAvailableBookAmount(CancellationToken.None, "nonexistent")
             );
         }
 
@@ -309,14 +423,20 @@ namespace BookManagement.Tests
                 Author = "Test Author",
                 ISBN = isbn,
                 PublicationYear = 2020,
-                AmountAvailable = 0
+                AmountAvailable = 0,
             };
 
-            _mockDbService.Setup(x => x.GetAsync(It.IsAny<CancellationToken>(), It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()))
+            _mockDbService
+                .Setup(x =>
+                    x.GetAsync(
+                        It.IsAny<CancellationToken>(),
+                        It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()
+                    )
+                )
                 .ReturnsAsync(book);
 
             // Act & Assert
-            await Assert.ThrowsAsync<BookManagement.Common.Exceptions.FailedToLendExpection>(
+            await Assert.ThrowsAsync<BookManagement.Common.Exceptions.FailedToLendException>(
                 () => _bookService.DecreaseAvailableBookAmount(CancellationToken.None, isbn)
             );
         }
@@ -337,10 +457,16 @@ namespace BookManagement.Tests
                 Author = "Test Author",
                 ISBN = isbn,
                 PublicationYear = 2020,
-                AmountAvailable = 5
+                AmountAvailable = 5,
             };
 
-            _mockDbService.Setup(x => x.GetAsync(It.IsAny<CancellationToken>(), It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()))
+            _mockDbService
+                .Setup(x =>
+                    x.GetAsync(
+                        It.IsAny<CancellationToken>(),
+                        It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()
+                    )
+                )
                 .ReturnsAsync(book);
 
             var expectedBook = new Book
@@ -350,14 +476,24 @@ namespace BookManagement.Tests
                 Author = "Test Author",
                 ISBN = isbn,
                 PublicationYear = 2020,
-                AmountAvailable = 6
+                AmountAvailable = 6,
             };
 
-            _mockDbService.Setup(x => x.UpdateAsync(It.IsAny<CancellationToken>(), It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>(), It.IsAny<Book>()))
+            _mockDbService
+                .Setup(x =>
+                    x.UpdateAsync(
+                        It.IsAny<CancellationToken>(),
+                        It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>(),
+                        It.IsAny<Book>()
+                    )
+                )
                 .ReturnsAsync(expectedBook);
 
             // Act
-            var result = await _bookService.IncreaseAvailableBookAmount(CancellationToken.None, isbn);
+            var result = await _bookService.IncreaseAvailableBookAmount(
+                CancellationToken.None,
+                isbn
+            );
 
             // Assert
             Assert.NotNull(result);
@@ -368,12 +504,19 @@ namespace BookManagement.Tests
         public async Task IncreaseAvailableBookAmount_ThrowsException_WhenBookNotFound()
         {
             // Arrange
-            _mockDbService.Setup(x => x.GetAsync(It.IsAny<CancellationToken>(), It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()))
+            _mockDbService
+                .Setup(x =>
+                    x.GetAsync(
+                        It.IsAny<CancellationToken>(),
+                        It.IsAny<System.Linq.Expressions.Expression<System.Func<Book, bool>>>()
+                    )
+                )
                 .ReturnsAsync((Book)null);
 
             // Act & Assert
             await Assert.ThrowsAsync<BookManagement.Common.Exceptions.NotFoundException>(
-                () => _bookService.IncreaseAvailableBookAmount(CancellationToken.None, "nonexistent")
+                () =>
+                    _bookService.IncreaseAvailableBookAmount(CancellationToken.None, "nonexistent")
             );
         }
 

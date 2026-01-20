@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
 using BookManagement.Common.Entities;
 using BookManagement.Common.Responses;
 using BookManagement.Services.Interfaces;
@@ -42,6 +43,29 @@ namespace Book_managmenet.Controllers
         }
 
         /// <summary>
+        /// Retrieves all books by size.
+        /// </summary>
+        /// <param name="ct">
+        /// <param name="page">
+        /// <param name="pageSize">
+        /// Cancellation token used to cancel the request.
+        /// </param>
+        /// <returns>
+        /// An <see cref="ActionResult"/> containing a collection of <see cref="BookResponse"/> objects.
+        /// </returns>
+        [HttpGet("get-paginated")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Book>))]
+        public async Task<ActionResult<PagedResult<BookResponse>>> GetAll(
+            CancellationToken ct,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10
+        )
+        {
+            var books = await _bookService.GetAll(ct, page, pageSize);
+            return Ok(books);
+        }
+
+        /// <summary>
         /// Lends a book by decreasing its available amount.
         /// </summary>
         /// <param name="isbn">
@@ -59,7 +83,11 @@ namespace Book_managmenet.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<LendResponse>> LendBook(
             [Required]
-            [StringLength(17, MinimumLength = 10, ErrorMessage = "ISBN musí mít 10 až 13 číslic.")]
+            [StringLength(
+                17,
+                MinimumLength = 10,
+                ErrorMessage = "ISBN must have 10 to 13 characters."
+            )]
                 string isbn,
             CancellationToken ct
         )
@@ -87,7 +115,11 @@ namespace Book_managmenet.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<LendResponse>> ReturnBook(
             [Required]
-            [StringLength(17, MinimumLength = 10, ErrorMessage = "ISBN musí mít 10 až 13 číslic.")]
+            [StringLength(
+                17,
+                MinimumLength = 10,
+                ErrorMessage = "ISBN must have 10 to 13 characters."
+            )]
                 string isbn,
             CancellationToken ct
         )

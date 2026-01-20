@@ -44,6 +44,19 @@ namespace BookManagement.Services.Interfaces
         Task<List<BookResponse>> GetAll(CancellationToken ct);
 
         /// <summary>
+        /// Retrieves a list all Book entities with amound defined by given arguments/>.
+        /// </summary>
+        /// <param name="page">specific page</param>
+        /// <param name="author">amount of books</param>
+        /// <returns>A <see cref="List{T}"/> where T is of type <see cref="Book"/></returns>
+        /// <exception cref="NotFoundException"></exception>
+        Task<PagedResult<BookResponse>> GetAll(
+            CancellationToken ct,
+            int page = 1,
+            int pageSize = 10
+        );
+
+        /// <summary>
         /// Creates a specific Book entity.
         /// </summary>
         /// <param name="request"><see cref="CreateBookRequest"/></param>

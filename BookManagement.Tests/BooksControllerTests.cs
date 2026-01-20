@@ -317,11 +317,11 @@ namespace BookManagement.Tests
             _mockBookService
                 .Setup(x => x.DecreaseAvailableBookAmount(It.IsAny<CancellationToken>(), isbn))
                 .ThrowsAsync(
-                    new BookManagement.Common.Exceptions.FailedToLendExpection(typeof(object))
+                    new BookManagement.Common.Exceptions.FailedToLendException(typeof(object))
                 );
 
             // Act & Assert
-            await Assert.ThrowsAsync<BookManagement.Common.Exceptions.FailedToLendExpection>(
+            await Assert.ThrowsAsync<BookManagement.Common.Exceptions.FailedToLendException>(
                 () => _controller.LendBook(isbn, CancellationToken.None)
             );
         }
